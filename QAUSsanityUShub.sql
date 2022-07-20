@@ -21,13 +21,14 @@ where encrypted_id in(select encrypted_id from not_cancelled)
 group by encrypted_id
 having ROUND(SUM(monthly_earned_premium),2) < (-0.01)
 
---Flat canclled with written or earned = 0
+--Flat canclled with written or earned <> 0
 with flat_cancelled AS(
     SELECT encrypted_id
     from monolith.policies a
     where flat_cancel <> 'FALSE'
     OR id in (select policy_id 
-              from policy_premium_activities b where a.id = b.policy_id                 and activity='policy_cancelation'
+              from policy_premium_activities b where a.id = b.policy_id                 
+              and activity='policy_cancelation'
               and metadata:flat_cancel = 'true'
              )
 )
