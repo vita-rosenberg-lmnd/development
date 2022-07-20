@@ -9,17 +9,17 @@ with not_cancelled AS(
     where canceled_date IS NULL
     and effective_date<current_date()
 )
-select sum(monthly_written_premium), encrypted_id,'monthly_written_premium' type
-from LEMONADE_DEVELOPMENT.FINANCE.PREMIUM_REPORT_US
+select sum(monthly_written_premium) AS sum_of_type, encrypted_id, 'monthly_written_premium' type
+from identifier($tableName)
 where encrypted_id in(select encrypted_id from not_cancelled)
 group by encrypted_id
-having ROUND(SUM(monthly_written_premium),2) < (-0.01)
+having (-0.01) < SUM(monthly_written_premium) and SUM(monthly_written_premium) < (0.01)
 UNION
-select sum(monthly_earned_premium), encrypted_id,'monthly_earned_premium' type
-from LEMONADE_DEVELOPMENT.FINANCE.PREMIUM_REPORT_US
+select sum(monthly_earned_premium) AS sum_of_type, encrypted_id, 'monthly_earned_premium' type
+from identifier($tableName)
 where encrypted_id in(select encrypted_id from not_cancelled)
 group by encrypted_id
-having ROUND(SUM(monthly_earned_premium),2) < (-0.01)
+having (-0.01) < SUM(monthly_earned_premium) and SUM(monthly_earned_premium) < (0.01)
 
 --Flat canclled with written or earned <> 0
 with flat_cancelled AS(
