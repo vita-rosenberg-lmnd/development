@@ -1,4 +1,7 @@
+--
 --pet_finance.premium_report_us
+--
+set tableName = 'LEMONADE_DEVELOPMENT.FINANCE.PET_PREMIUM_REPORT_US';
 create or replace table identifier($tableName)
 AS
 select * from LEMONADE.PET_FINANCE.PREMIUM_REPORT_US;
