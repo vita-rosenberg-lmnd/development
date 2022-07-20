@@ -120,3 +120,23 @@ from LEMONADE_DEVELOPMENT.FINANCE.vwPET_PREMIUM_REPORT_US
 where public_id in(select public_id from not_cancelled)
 group by public_id
 having ROUND(SUM(monthly_earned_premium),2) < (-0.01)
+
+--pet Flat canclled with written or earned <> 0
+WITH pet_flat_cancelled AS(
+    SELECT b.public_id AS policyId
+    FROM billing.finance_events a 
+    JOIN pet.policies b ON a.id=b.id
+    where activity = 'policy_cancellation' 
+    and metadata:flat='true'
+)
+SELECT sum(monthly_written_premium), public_id, 'monthly_written_premium' type
+from LEMONADE_DEVELOPMENT.FINANCE.vwPET_PREMIUM_REPORT_US
+where public_id in(select policyId from pet_flat_cancelled)
+group by public_id
+having SUM(monthly_written_premium)  <> 0
+UNION
+select sum(monthly_earned_premium), public_id,'monthly_earned_premium' type
+from LEMONADE_DEVELOPMENT.FINANCE.vwPET_PREMIUM_REPORT_US
+where public_id in(select policyId from pet_flat_cancelled)
+group by public_id
+having SUM(monthly_earned_premium) <> 0   
