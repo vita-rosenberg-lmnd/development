@@ -59,3 +59,20 @@ from identifier($tableName)
 group by public_id
 having ROUND(SUM(monthly_written_premium),2) < (-0.01)
 
+--pet Policy is active and written or earned <= 0 
+with pet_active_policies AS(
+select public_id 
+from pet.policies
+where status = 'active'
+)
+select sum(monthly_written_premium), public_id,'monthly_written_premium' type
+from identifier($tableName)
+where public_id in(select public_id from pet_active_policies)
+group by public_id
+having SUM(monthly_written_premium)  <= 0
+UNION
+select sum(monthly_earned_premium), public_id,'monthly_earned_premium' type
+from identifier($tableName)
+where public_id in(select public_id from pet_active_policies)
+group by public_id
+having SUM(monthly_earned_premium) <= 0
