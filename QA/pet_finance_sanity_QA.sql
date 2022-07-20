@@ -17,13 +17,13 @@ select sum(monthly_written_premium), public_id,'monthly_written_premium' type
 from identifier($tableName)
 where public_id in(select public_id from not_cancelled)
 group by public_id
-having ROUND(SUM(monthly_written_premium),2) < (-0.01)
+having (-0.01) < SUM(monthly_written_premium) and SUM(monthly_written_premium) < (0.01)
 UNION
 select sum(monthly_earned_premium), public_id,'monthly_earned_premium' type
 from identifier($tableName)
 where public_id in(select public_id from not_cancelled)
 group by public_id
-having ROUND(SUM(monthly_earned_premium),2) < (-0.01);
+having (-0.01) < SUM(monthly_earned_premium) and SUM(monthly_earned_premium) < (0.01)
 
 --pet Flat canclled with written or earned <> 0
 WITH pet_flat_cancelled AS(
