@@ -76,3 +76,20 @@ from identifier($tableName)
 where public_id in(select public_id from pet_active_policies)
 group by public_id
 having SUM(monthly_earned_premium) <= 0
+
+--pet Policy is not active and written <> earned
+with active_policies AS(
+    SELECT public_id
+    from pet.policies
+    where status<>'active'
+),
+    monthly_difference as(
+    select  (sum(monthly_written_premium) - sum(monthly_earned_premium)) AS monthly_sum, public_id 
+    from identifier($tableName)
+    where public_id in(select public_id from active_policies)
+    group by public_id
+    having round(ABS((sum(monthly_written_premium) - sum(monthly_earned_premium))),2) > 0.01
+    )
+    
+select public_id, monthly_sum
+from monthly_difference
