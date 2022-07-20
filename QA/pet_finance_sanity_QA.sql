@@ -41,8 +41,21 @@ where public_id in(select policyId from pet_flat_cancelled)
 group by public_id
 having ABS(SUM(monthly_earned_premium)) > 0.01 
 
---Unearned premium < 0
+--monthly_unearned_premium < 0
 select SUM(monthly_unearned_premium), public_id
 from identifier($tableName)
 group by public_id
 having ROUND(SUM(monthly_unearned_premium),2) < (-0.01)
+
+--monthly_earned_premium < 0
+select SUM(monthly_earned_premium), public_id
+from identifier($tableName)
+group by public_id
+having ROUND(SUM(monthly_earned_premium),2) < (-0.01)
+
+--monthly_written_premium < 0
+select SUM(monthly_written_premium), public_id
+from identifier($tableName)
+group by public_id
+having ROUND(SUM(monthly_written_premium),2) < (-0.01)
+
