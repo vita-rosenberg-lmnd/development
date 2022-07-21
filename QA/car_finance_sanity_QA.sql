@@ -1,11 +1,7 @@
---
---car_finance.premium_report_us
---
-
-set tableName = 'CAR_FINANCE.PREMIUM_REPORT_US';
+set tableName = 'CAR_FINANCE.tmpPREMIUM_REPORT_US';
 create or replace temporary table identifier($tableName)
 AS
-select * from CAR_FINANCE.PREMIUM_REPORT_US
+select * from CAR_FINANCE.PREMIUM_REPORT_US;
 
 --car Not canclled with written or earned = 0
 with car_not_cancelled AS(
