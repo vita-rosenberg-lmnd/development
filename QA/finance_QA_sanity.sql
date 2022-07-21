@@ -1,7 +1,7 @@
-set tableName = 'LEMONADE_DEVELOPMENT.FINANCE.PREMIUM_REPORT_US';
-create or replace table identifier($tableName)
+set tableName = 'FINANCE.PREMIUM_REPORT_US';
+create or replace temporary table identifier($tableName)
 AS
-select * from LEMONADE.FINANCE.PREMIUM_REPORT_US
+select * from FINANCE.PREMIUM_REPORT_US
 
 --Not canclled with written or earned = 0
 with not_cancelled AS(
