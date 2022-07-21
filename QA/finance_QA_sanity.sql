@@ -3,6 +3,11 @@ create or replace temporary table identifier($tableName)
 AS
 select * from FINANCE.PREMIUM_REPORT_US
 
+WITH temp_premium_report_us AS(
+    select * 
+    FROM FINANCE.PREMIUM_REPORT_US
+),
+
 --Not canclled with written or earned = 0
 with not_cancelled AS(
     SELECT encrypted_id
