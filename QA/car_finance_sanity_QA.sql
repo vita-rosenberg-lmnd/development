@@ -1,3 +1,7 @@
+--
+--car_finance.premium_report_us
+--
+
 set tableName = 'CAR_FINANCE.PREMIUM_REPORT_US';
 create or replace temporary table identifier($tableName)
 AS
