@@ -25,22 +25,23 @@ where public_id in(select public_id from not_cancelled)
 group by public_id
 having (-0.01) < SUM(monthly_earned_premium) and SUM(monthly_earned_premium) < (0.01)
 
---pet Flat canclled with written or earned <> 0
-WITH pet_flat_cancelled AS(
+--car Flat canclled with written or earned <> 0
+WITH car_flat_cancelled AS(
     SELECT entity_id AS policyId
     FROM billing.finance_events activity
     where activity= 'policy_cancellation' 
     and metadata:flat='true'
+    and entity_id like 'LCP%'
 )
 SELECT sum(monthly_written_premium), public_id, 'monthly_written_premium' type
 from identifier($tableName)
-where public_id in(select policyId from pet_flat_cancelled)
+where public_id in(select policyId from car_flat_cancelled)
 group by public_id
 having ABS(SUM(monthly_written_premium))  > 0.01
 UNION
 select sum(monthly_earned_premium), public_id,'monthly_earned_premium' type
 from identifier($tableName)
-where public_id in(select policyId from pet_flat_cancelled)
+where public_id in(select policyId from car_flat_cancelled)
 group by public_id
 having ABS(SUM(monthly_earned_premium)) > 0.01 
 
@@ -81,7 +82,7 @@ group by public_id
 having SUM(monthly_earned_premium) <= 0
 
 --car Policy is not active and written <> earned
-with car_active_policies AS(
+with car_non_active_policies AS(
     SELECT public_id
     from car.policies
     where status<>'active'
@@ -89,7 +90,7 @@ with car_active_policies AS(
     monthly_difference as(
     select  (sum(monthly_written_premium) - sum(monthly_earned_premium)) AS monthly_sum, public_id 
     from identifier($tableName)
-    where public_id in(select public_id from car_active_policies)
+    where public_id in(select public_id from car_non_active_policies)
     group by public_id
     having round(ABS((sum(monthly_written_premium) - sum(monthly_earned_premium))),2) > 0.01
     )
