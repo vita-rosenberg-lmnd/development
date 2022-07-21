@@ -1,7 +1,4 @@
---
---pet_finance.premium_report_us
---
-set tableName = 'PET_FINANCE.PET_PREMIUM_REPORT_US';
+set tableName = 'PET_FINANCE.tmpPREMIUM_REPORT_US';
 create or replace temporary table identifier($tableName)
 AS
 select * from PET_FINANCE.PREMIUM_REPORT_US;
