@@ -83,7 +83,7 @@ monthly_earned_premium AS(
          SELECT   SUM(monthly_earned_premium),
                   public_id,
                   'monthly_earned_premium < 0' AS errType
-         FROM     temp_premium_report_us($tableName)
+         FROM     temp_premium_report_us
          GROUP BY public_id
          HAVING   ROUND(SUM(monthly_earned_premium),2) < (-0.01) 
 ),
