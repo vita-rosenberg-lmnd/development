@@ -61,3 +61,38 @@ select SUM(monthly_written_premium), public_id
 from identifier($tableName)
 group by public_id
 having ROUND(SUM(monthly_written_premium),2) < (-0.01)
+
+--car Policy is active and written or earned <= 0 
+with car_active_policies AS(
+select public_id 
+from car.policies
+where status = 'active'
+)
+select sum(monthly_written_premium), public_id,'monthly_written_premium' type
+from identifier($tableName)
+where public_id in(select public_id from car_active_policies)
+group by public_id
+having SUM(monthly_written_premium)  <= 0
+UNION
+select sum(monthly_earned_premium), public_id,'monthly_earned_premium' type
+from identifier($tableName)
+where public_id in(select public_id from car_active_policies)
+group by public_id
+having SUM(monthly_earned_premium) <= 0
+
+--car Policy is not active and written <> earned
+with car_active_policies AS(
+    SELECT public_id
+    from car.policies
+    where status<>'active'
+),
+    monthly_difference as(
+    select  (sum(monthly_written_premium) - sum(monthly_earned_premium)) AS monthly_sum, public_id 
+    from identifier($tableName)
+    where public_id in(select public_id from car_active_policies)
+    group by public_id
+    having round(ABS((sum(monthly_written_premium) - sum(monthly_earned_premium))),2) > 0.01
+    )
+    
+select public_id, monthly_sum
+from monthly_difference
