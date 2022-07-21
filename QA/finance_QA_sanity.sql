@@ -1,4 +1,4 @@
-set tableName = 'FINANCE.PREMIUM_REPORT_US';
+set tableName = 'FINANCE.tmpPREMIUM_REPORT_US';
 create or replace temporary table identifier($tableName)
 AS
 select * from FINANCE.PREMIUM_REPORT_US
