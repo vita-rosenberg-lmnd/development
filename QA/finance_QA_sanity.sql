@@ -48,19 +48,19 @@ having (-0.01) > SUM(monthly_earned_premium) OR SUM(monthly_earned_premium) > (0
 
 -------monthly_unearned_premium < 0
 select SUM(monthly_unearned_premium), encrypted_id
-from LEMONADE_DEVELOPMENT.FINANCE.PREMIUM_REPORT_US
+from identifier($tableName)
 group by encrypted_id
 having ROUND(SUM(monthly_unearned_premium),2) < (-0.01)
 
 -------monthly_earned_premium < 0
 select SUM(monthly_earned_premium), encrypted_id
-from LEMONADE_DEVELOPMENT.FINANCE.PREMIUM_REPORT_US
+from identifier($tableName)
 group by encrypted_id
 having ROUND(SUM(monthly_earned_premium),2) < (-0.01)
  
 -------monthly_written_premium < 0
 select SUM(monthly_written_premium), encrypted_id
-from LEMONADE_DEVELOPMENT.FINANCE.PREMIUM_REPORT_US
+from identifier($tableName)
 group by encrypted_id
 having ROUND(SUM(monthly_written_premium),2) < (-0.01) 
 
@@ -71,13 +71,13 @@ with active_policies AS(
     where status='active'
 )
 select sum(monthly_written_premium), encrypted_id,'monthly_written_premium' type
-from LEMONADE_DEVELOPMENT.FINANCE.PREMIUM_REPORT_US--44,867,215
+from identifier($tableName)
 where encrypted_id in(select encrypted_id from active_policies)
 group by encrypted_id
 having SUM(monthly_written_premium)  <= 0
 UNION
 select sum(monthly_earned_premium), encrypted_id,'monthly_earned_premium' type
-from LEMONADE_DEVELOPMENT.FINANCE.PREMIUM_REPORT_US--44,867,215
+from identifier($tableName)
 where encrypted_id in(select encrypted_id from active_policies)
 group by encrypted_id
 having SUM(monthly_earned_premium) <= 0
@@ -90,7 +90,7 @@ with active_policies AS(
 ),
     monthly_difference as(
     select  (sum(monthly_written_premium) - sum(monthly_earned_premium)) AS monthly_sum, encrypted_id 
-    from LEMONADE_DEVELOPMENT.FINANCE.PREMIUM_REPORT_US
+    from identifier($tableName)
     where encrypted_id in(select encrypted_id from active_policies)
     group by encrypted_id
     having round(ABS((sum(monthly_written_premium) - sum(monthly_earned_premium))),2) > 0.01
