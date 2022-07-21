@@ -8,20 +8,20 @@ AS
 select * from CAR_FINANCE.PREMIUM_REPORT_US
 
 --car Not canclled with written or earned = 0
-with not_cancelled AS(
+with car_not_cancelled AS(
     SELECT public_id
     from car.policies
     where cancelled_at is null
 )
 select sum(monthly_written_premium) AS sum_of_type, public_id, 'monthly_written_premium' type
 from identifier($tableName)
-where public_id in(select public_id from not_cancelled)
+where public_id in(select public_id from car_not_cancelled)
 group by public_id
 having (-0.01) < SUM(monthly_written_premium) and SUM(monthly_written_premium) < (0.01)
 UNION
 select sum(monthly_earned_premium) AS sum_of_type, public_id, 'monthly_earned_premium' type
 from identifier($tableName)
-where public_id in(select public_id from not_cancelled)
+where public_id in(select public_id from car_not_cancelled)
 group by public_id
 having (-0.01) < SUM(monthly_earned_premium) and SUM(monthly_earned_premium) < (0.01)
 
@@ -82,7 +82,7 @@ group by public_id
 having SUM(monthly_earned_premium) <= 0
 
 --car Policy is not active and written <> earned
-with car_non_active_policies AS(
+with car_inactive_policies AS(
     SELECT public_id
     from car.policies
     where status<>'active'
@@ -90,7 +90,7 @@ with car_non_active_policies AS(
     monthly_difference as(
     select  (sum(monthly_written_premium) - sum(monthly_earned_premium)) AS monthly_sum, public_id 
     from identifier($tableName)
-    where public_id in(select public_id from car_non_active_policies)
+    where public_id in(select public_id from car_inactive_policies)
     group by public_id
     having round(ABS((sum(monthly_written_premium) - sum(monthly_earned_premium))),2) > 0.01
     )
