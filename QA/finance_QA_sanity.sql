@@ -1,6 +1,7 @@
---create or replace table LEMONADE_DEVELOPMENT.FINANCE.PREMIUM_REPORT_US
---AS
---select * from LEMONADE.FINANCE.PREMIUM_REPORT_US
+set tableName = 'LEMONADE_DEVELOPMENT.FINANCE.PREMIUM_REPORT_US';
+create or replace table identifier($tableName)
+AS
+select * from LEMONADE.FINANCE.PREMIUM_REPORT_US
 
 --Not canclled with written or earned = 0
 with not_cancelled AS(
@@ -33,16 +34,17 @@ with flat_cancelled AS(
              )
 )
 select sum(monthly_written_premium), encrypted_id,'monthly_written_premium' type
-from LEMONADE_DEVELOPMENT.FINANCE.PREMIUM_REPORT_US--44,867,215
+from identifier($tableName)
 where encrypted_id in(select encrypted_id from flat_cancelled)
 group by encrypted_id
-having SUM(monthly_written_premium)  <> 0
+--having SUM(monthly_written_premium)  <> 0
+having (-0.01) > SUM(monthly_written_premium) OR SUM(monthly_written_premium) > (0.01)
 UNION
 select sum(monthly_earned_premium), encrypted_id,'monthly_earned_premium' type
-from LEMONADE_DEVELOPMENT.FINANCE.PREMIUM_REPORT_US--44,867,215
+from identifier($tableName)
 where encrypted_id in(select encrypted_id from flat_cancelled)
 group by encrypted_id
-having SUM(monthly_earned_premium) <> 0
+having (-0.01) > SUM(monthly_earned_premium) OR SUM(monthly_earned_premium) > (0.01)
 
 -------monthly_unearned_premium < 0
 select SUM(monthly_unearned_premium), encrypted_id
