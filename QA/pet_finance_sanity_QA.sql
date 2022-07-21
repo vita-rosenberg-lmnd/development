@@ -6,8 +6,8 @@ create or replace temporary table identifier($tableName)
 AS
 select * from PET_FINANCE.PREMIUM_REPORT_US;
 
---Not canclled with written or earned = 0
-with not_cancelled AS(
+--pet Not canclled with written or earned = 0
+with pet_not_cancelled AS(
 select public_id 
 from pet.policies
 where canceled_at is null
@@ -15,13 +15,13 @@ where canceled_at is null
 
 select sum(monthly_written_premium), public_id,'monthly_written_premium' type
 from identifier($tableName)
-where public_id in(select public_id from not_cancelled)
+where public_id in(select public_id from pet_not_cancelled)
 group by public_id
 having (-0.01) < SUM(monthly_written_premium) and SUM(monthly_written_premium) < (0.01)
 UNION
 select sum(monthly_earned_premium), public_id,'monthly_earned_premium' type
 from identifier($tableName)
-where public_id in(select public_id from not_cancelled)
+where public_id in(select public_id from pet_not_cancelled)
 group by public_id
 having (-0.01) < SUM(monthly_earned_premium) and SUM(monthly_earned_premium) < (0.01)
 
@@ -31,6 +31,7 @@ WITH pet_flat_cancelled AS(
     FROM billing.finance_events activity
     where activity= 'policy_cancellation' 
     and metadata:flat='true'
+    and entity_id like 'LPP%'
 )
 SELECT sum(monthly_written_premium), public_id, 'monthly_written_premium' type
 from identifier($tableName)
@@ -81,7 +82,7 @@ group by public_id
 having SUM(monthly_earned_premium) <= 0
 
 --pet Policy is not active and written <> earned
-with active_policies AS(
+with pet_inactive_policies AS(
     SELECT public_id
     from pet.policies
     where status<>'active'
@@ -89,7 +90,7 @@ with active_policies AS(
     monthly_difference as(
     select  (sum(monthly_written_premium) - sum(monthly_earned_premium)) AS monthly_sum, public_id 
     from identifier($tableName)
-    where public_id in(select public_id from active_policies)
+    where public_id in(select public_id from pet_inactive_policies)
     group by public_id
     having round(ABS((sum(monthly_written_premium) - sum(monthly_earned_premium))),2) > 0.01
     )
