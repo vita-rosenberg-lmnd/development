@@ -1,10 +1,10 @@
 --
 --pet_finance.premium_report_us
 --
-set tableName = 'LEMONADE_DEVELOPMENT.FINANCE.PET_PREMIUM_REPORT_US';
-create or replace table identifier($tableName)
+set tableName = 'PET_FINANCE.PET_PREMIUM_REPORT_US';
+create or replace temporary table identifier($tableName)
 AS
-select * from LEMONADE.PET_FINANCE.PREMIUM_REPORT_US;
+select * from PET_FINANCE.PREMIUM_REPORT_US;
 
 --Not canclled with written or earned = 0
 with not_cancelled AS(
