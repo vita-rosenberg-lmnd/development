@@ -1,6 +1,7 @@
 
 WITH temp_premium_report_us AS(
-    select * from CAR_FINANCE.PREMIUM_REPORT_US
+    select * 
+    FROM car_finance.premium_report_us
 ),
 
 car_not_cancelled AS(
