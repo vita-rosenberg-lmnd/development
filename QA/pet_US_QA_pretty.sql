@@ -7,7 +7,7 @@ WITH temp_premium_report_us AS(
 pet_not_cancelled AS(
        SELECT public_id
        FROM   pet.policies
-       WHERE  cancelled_at IS NULL 
+       WHERE  canceled_at IS NULL 
 ), 
 
 pet_not_cancelled_monthly_written_premium AS(
@@ -42,7 +42,7 @@ pet_flat_cancelled AS(
        FROM   billing.finance_events activity
        WHERE  activity= 'policy_cancellation'
        AND    metadata:flat='true'
-       AND    entity_id LIKE 'LCP%' 
+       AND    entity_id LIKE 'LPP%' 
 ), 
 
 pet_flat_cancelled_monthly_written_premium AS(
