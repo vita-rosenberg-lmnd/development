@@ -4,6 +4,7 @@ WITH temp_premium_report_us AS (
   FROM 
     finance.premium_report_us
 ), 
+
 --Not canclled with written or earned = 0
 not_cancelled AS (
   SELECT 
@@ -14,9 +15,10 @@ not_cancelled AS (
     canceled_date IS NULL 
   AND effective_date < CURRENT_DATE()
 ), 
+
 not_cancelled_monthly_written_premium AS (
   SELECT 
-    Sum(monthly_written_premium) AS sum_of_type, 
+    SUM(monthly_written_premium) AS sum_of_type, 
     encrypted_id, 
     'not_cancelled_monthly_written_premium' AS errtype 
   FROM 
@@ -34,6 +36,7 @@ not_cancelled_monthly_written_premium AS (
     (-0.01) < SUM(monthly_written_premium) 
   AND Sum(monthly_written_premium) < (0.01)
 ), 
+
 not_cancelled_monthly_earned_premium AS (
   SELECT 
     SUM(monthly_earned_premium) AS sum_of_type, 
@@ -54,6 +57,7 @@ not_cancelled_monthly_earned_premium AS (
     (-0.01) < SUM(monthly_earned_premium) 
   AND Sum(monthly_earned_premium) < (0.01)
 ), 
+
 --Flat canclled with written or earned <> 0
 flat_cancelled AS (
   SELECT 
@@ -73,6 +77,7 @@ flat_cancelled AS (
         AND METADATA : flat_cancel = 'true'
     )
 ), 
+
 flat_cancelled_monthly_written_premium AS (
   SELECT 
     SUM(monthly_written_premium), 
@@ -93,6 +98,7 @@ flat_cancelled_monthly_written_premium AS (
     (-0.01) > sum(monthly_written_premium) 
   OR sum(monthly_written_premium) > (0.01)
 ), 
+
 flat_cancelled_monthly_earned_premium AS (
   SELECT 
     SUM(monthly_earned_premium), 
@@ -110,9 +116,10 @@ flat_cancelled_monthly_earned_premium AS (
   GROUP BY 
     encrypted_id 
   HAVING 
-    (-0.01) > sum(monthly_earned_premium) 
+    (-0.01) > SUM(monthly_earned_premium) 
   OR sum(monthly_earned_premium) > (0.01)
 ), 
+
 -------monthly_unearned_premium < 0
 monthly_unearned_premium AS (
   SELECT 
@@ -126,6 +133,7 @@ monthly_unearned_premium AS (
   HAVING 
     ROUND(SUM(monthly_unearned_premium), 2) < (-0.01)
 ), 
+
 -------monthly_earned_premium < 0
 monthly_earned_premium AS (
   SELECT 
@@ -139,6 +147,7 @@ monthly_earned_premium AS (
   HAVING 
     ROUND(SUM(monthly_earned_premium), 2) < (-0.01)
 ), 
+
 -------monthly_written_premium < 0
 monthly_written_premium AS (
   SELECT 
@@ -152,6 +161,7 @@ monthly_written_premium AS (
   HAVING 
     ROUND(SUM(monthly_written_premium), 2) < (-0.01)
 ), 
+
 --Policy is active and written or earned <= 0
 active_policies AS (
   SELECT 
@@ -161,6 +171,7 @@ active_policies AS (
   WHERE 
     status = 'active'
 ), 
+
 active_policies_monthly_written_premium AS (
   SELECT 
     SUM(monthly_written_premium), 
@@ -178,8 +189,9 @@ active_policies_monthly_written_premium AS (
   GROUP BY 
     encrypted_id 
   HAVING 
-    sum(monthly_written_premium) <= 0
+    SUM(monthly_written_premium) <= 0
 ), 
+
 active_policies_monthly_earned_premium AS (
   SELECT 
     SUM(monthly_earned_premium), 
@@ -197,10 +209,11 @@ active_policies_monthly_earned_premium AS (
   GROUP BY 
     encrypted_id 
   HAVING 
-    sum(monthly_earned_premium) <= 0
+    SUM(monthly_earned_premium) <= 0
 ), 
+
 --Policy is not active and written <> earned
-active_policies AS (
+inactive_policies AS (
   SELECT 
     encrypted_id 
   FROM 
@@ -211,7 +224,7 @@ active_policies AS (
 inactive_policies_monthly_difference AS (
   SELECT 
     (
-      sum(monthly_written_premium) - sum(monthly_earned_premium)
+      SUM(monthly_written_premium) - SUM(monthly_earned_premium)
     ) AS monthly_sum, 
     encrypted_id, 
     'active_policies_monthly_difference' AS errtype 
@@ -222,20 +235,13 @@ inactive_policies_monthly_difference AS (
       SELECT 
         encrypted_id 
       FROM 
-        active_policies
+        inactive_policies
     ) 
   GROUP BY 
     encrypted_id 
-  HAVING 
-    round(
-      abs(
-        (
-          sum(monthly_written_premium) - sum(monthly_earned_premium)
-        )
-      ), 
-      2
-    ) > 0.01
+  HAVING round(abs((SUM(monthly_written_premium) - sum(monthly_earned_premium))), 2) > 0.01
 ) 
+
 SELECT 
   encrypted_id, 
   errtype 
