@@ -100,10 +100,7 @@ car_flat_cancelled_monthly_earned_premium AS(
     ) 
   GROUP BY 
     public_id 
-  HAVING 
-    ABS(
-      SUM(monthly_earned_premium)
-    ) > 0.01
+  HAVING ABS(SUM(monthly_earned_premium)) > 0.01
 ), 
 --monthly_unearned_premium < 0
 monthly_unearned_premium AS(
@@ -115,11 +112,7 @@ monthly_unearned_premium AS(
     temp_premium_report_us 
   GROUP BY 
     public_id 
-  HAVING 
-    ROUND(
-      SUM(monthly_unearned_premium), 
-      2
-    ) < (-0.01)
+  HAVING ROUND(SUM(monthly_unearned_premium), 2) < (-0.01)
 ), 
 --monthly_earned_premium < 0
 monthly_earned_premium AS(
@@ -132,10 +125,7 @@ monthly_earned_premium AS(
   GROUP BY 
     public_id 
   HAVING 
-    ROUND(
-      SUM(monthly_earned_premium), 
-      2
-    ) < (-0.01)
+    ROUND(SUM(monthly_earned_premium), 2) < (-0.01)
 ), 
 --monthly_written_premium < 0
 monthly_written_premium AS(
@@ -148,10 +138,7 @@ monthly_written_premium AS(
   GROUP BY 
     public_id 
   HAVING 
-    ROUND(
-      SUM(monthly_written_premium), 
-      2
-    ) < (-0.01)
+    ROUND(SUM(monthly_written_premium), 2) < (-0.01)
 ), 
 --car Policy is active and written or earned <= 0
 car_active_policies AS(
