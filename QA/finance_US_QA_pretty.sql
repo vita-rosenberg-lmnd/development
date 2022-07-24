@@ -34,7 +34,7 @@ not_cancelled_monthly_written_premium AS (
     encrypted_id 
   HAVING 
     (-0.01) < SUM(monthly_written_premium) 
-  AND Sum(monthly_written_premium) < (0.01)
+  AND SUM(monthly_written_premium) < (0.01)
 ), 
 
 not_cancelled_monthly_earned_premium AS (
@@ -55,7 +55,7 @@ not_cancelled_monthly_earned_premium AS (
     encrypted_id 
   HAVING 
     (-0.01) < SUM(monthly_earned_premium) 
-  AND Sum(monthly_earned_premium) < (0.01)
+  AND SUM(monthly_earned_premium) < (0.01)
 ), 
 
 --Flat canclled with written or earned <> 0
@@ -95,8 +95,8 @@ flat_cancelled_monthly_written_premium AS (
   GROUP BY 
     encrypted_id --having SUM(monthly_written_premium)  <> 0
   HAVING 
-    (-0.01) > sum(monthly_written_premium) 
-  OR sum(monthly_written_premium) > (0.01)
+    (-0.01) > SUM(monthly_written_premium) 
+  OR SUM(monthly_written_premium) > (0.01)
 ), 
 
 flat_cancelled_monthly_earned_premium AS (
@@ -117,7 +117,7 @@ flat_cancelled_monthly_earned_premium AS (
     encrypted_id 
   HAVING 
     (-0.01) > SUM(monthly_earned_premium) 
-  OR sum(monthly_earned_premium) > (0.01)
+  OR SUM(monthly_earned_premium) > (0.01)
 ), 
 
 -------monthly_unearned_premium < 0
@@ -151,7 +151,7 @@ monthly_earned_premium AS (
 -------monthly_written_premium < 0
 monthly_written_premium AS (
   SELECT 
-    sum(monthly_written_premium), 
+    SUM(monthly_written_premium), 
     encrypted_id, 
     'monthly_written_premium < 0' AS errtype 
   FROM 
@@ -239,7 +239,7 @@ inactive_policies_monthly_difference AS (
     ) 
   GROUP BY 
     encrypted_id 
-  HAVING round(abs((SUM(monthly_written_premium) - sum(monthly_earned_premium))), 2) > 0.01
+  HAVING round(abs((SUM(monthly_written_premium) - SUM(monthly_earned_premium))), 2) > 0.01
 ) 
 
 SELECT 
