@@ -4,6 +4,7 @@ WITH temp_premium_report_us AS(
   FROM 
     car_finance.premium_report_us
 ), 
+
 car_not_cancelled AS(
   SELECT 
     public_id 
@@ -12,6 +13,7 @@ car_not_cancelled AS(
   WHERE 
     cancelled_at IS NULL
 ), 
+
 car_not_cancelled_monthly_written_premium AS(
   SELECT 
     SUM(monthly_written_premium) AS sum_of_type, 
@@ -32,6 +34,7 @@ car_not_cancelled_monthly_written_premium AS(
     (-0.01) < SUM(monthly_written_premium) 
   AND SUM(monthly_written_premium) < (0.01)
 ), 
+
 car_not_cancelled_monthly_earned_premium AS(
   SELECT 
     SUM(monthly_earned_premium) AS sum_of_type, 
@@ -52,6 +55,7 @@ car_not_cancelled_monthly_earned_premium AS(
     (-0.01) < SUM(monthly_earned_premium) 
   AND SUM(monthly_earned_premium) < (0.01)
 ), 
+
 --car Flat canclled with written or earned <> 0
 car_flat_cancelled AS(
   SELECT 
@@ -63,6 +67,7 @@ car_flat_cancelled AS(
     AND metadata : flat = 'true' 
     AND entity_id LIKE 'LCP%'
 ), 
+
 car_flat_cancelled_monthly_written_premium AS(
   SELECT 
     SUM(monthly_written_premium), 
@@ -80,10 +85,9 @@ car_flat_cancelled_monthly_written_premium AS(
   GROUP BY 
     public_id 
   HAVING 
-    ABS(
-      SUM(monthly_written_premium)
-    ) > 0.01
+    ABS(SUM(monthly_written_premium)) > 0.01
 ), 
+
 car_flat_cancelled_monthly_earned_premium AS(
   SELECT 
     SUM(monthly_earned_premium), 
@@ -102,6 +106,7 @@ car_flat_cancelled_monthly_earned_premium AS(
     public_id 
   HAVING ABS(SUM(monthly_earned_premium)) > 0.01
 ), 
+
 --monthly_unearned_premium < 0
 monthly_unearned_premium AS(
   SELECT 
@@ -114,6 +119,7 @@ monthly_unearned_premium AS(
     public_id 
   HAVING ROUND(SUM(monthly_unearned_premium), 2) < (-0.01)
 ), 
+
 --monthly_earned_premium < 0
 monthly_earned_premium AS(
   SELECT 
@@ -127,6 +133,7 @@ monthly_earned_premium AS(
   HAVING 
     ROUND(SUM(monthly_earned_premium), 2) < (-0.01)
 ), 
+
 --monthly_written_premium < 0
 monthly_written_premium AS(
   SELECT 
@@ -140,6 +147,7 @@ monthly_written_premium AS(
   HAVING 
     ROUND(SUM(monthly_written_premium), 2) < (-0.01)
 ), 
+
 --car Policy is active and written or earned <= 0
 car_active_policies AS(
   SELECT 
@@ -149,6 +157,7 @@ car_active_policies AS(
   WHERE 
     status = 'active'
 ), 
+
 car_active_policies_monthly_written_premium AS(
   SELECT 
     SUM(monthly_written_premium), 
@@ -168,6 +177,7 @@ car_active_policies_monthly_written_premium AS(
   HAVING 
     SUM(monthly_written_premium) <= 0
 ), 
+
 car_active_policies_monthly_earned_premium AS(
   SELECT 
     SUM(monthly_earned_premium), 
@@ -187,6 +197,7 @@ car_active_policies_monthly_earned_premium AS(
   HAVING 
     SUM(monthly_earned_premium) <= 0
 ), 
+
 --car Policy is not active and written <> earned
 car_inactive_policies AS(
   SELECT 
@@ -196,6 +207,7 @@ car_inactive_policies AS(
   WHERE 
     status <> 'active'
 ), 
+
 car_inactive_policies_monthly_difference AS(
   SELECT 
     (
@@ -215,14 +227,7 @@ car_inactive_policies_monthly_difference AS(
   GROUP BY 
     public_id 
   HAVING 
-    ROUND(
-      ABS(
-        (
-          SUM(monthly_written_premium) - SUM(monthly_earned_premium)
-        )
-      ), 
-      2
-    ) > 0.01
+    ROUND(ABS((SUM(monthly_written_premium) - SUM(monthly_earned_premium))), 2) > 0.01
 ) 
 SELECT 
   public_id, 
