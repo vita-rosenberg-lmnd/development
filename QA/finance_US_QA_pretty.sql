@@ -12,7 +12,7 @@ not_cancelled AS (
     monolith.policies 
   WHERE 
     canceled_date IS NULL 
-    AND effective_date < CURRENT_DATE()
+  AND effective_date < CURRENT_DATE()
 ), 
 not_cancelled_monthly_written_premium AS (
   SELECT 
