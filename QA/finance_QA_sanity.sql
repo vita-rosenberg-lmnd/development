@@ -209,7 +209,7 @@ active_policies_monthly_earned_premium AS (
     sum(monthly_earned_premium) <= 0
 ), 
 --Policy is not active and written <> earned
-active_policies AS (
+inactive_policies AS (
   SELECT 
     encrypted_id 
   FROM 
@@ -223,7 +223,7 @@ inactive_policies_monthly_difference AS (
       sum(monthly_written_premium) - sum(monthly_earned_premium)
     ) AS monthly_sum, 
     encrypted_id, 
-    'active_policies_monthly_difference' AS errtype 
+    'inactive_policies_monthly_difference' AS errtype 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -231,20 +231,14 @@ inactive_policies_monthly_difference AS (
       SELECT 
         encrypted_id 
       FROM 
-        active_policies
+        inactive_policies
     ) 
   GROUP BY 
     encrypted_id 
   HAVING 
-    round(
-      abs(
-        (
-          sum(monthly_written_premium) - sum(monthly_earned_premium)
-        )
-      ), 
-      2
-    ) > 0.01
+    round(abs((sum(monthly_written_premium) - sum(monthly_earned_premium))), 2) > 0.01
 ) 
+
 SELECT 
   encrypted_id, 
   errtype 
