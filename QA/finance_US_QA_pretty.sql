@@ -31,7 +31,7 @@ not_cancelled_monthly_written_premium AS (
   GROUP BY 
     encrypted_id 
   HAVING 
-    (-0.01) < /SUM(monthly_written_premium) 
+    (-0.01) < SUM(monthly_written_premium) 
   AND Sum(monthly_written_premium) < (0.01)
 ), 
 not_cancelled_monthly_earned_premium AS (
@@ -124,10 +124,7 @@ monthly_unearned_premium AS (
   GROUP BY 
     encrypted_id 
   HAVING 
-    ROUND(
-      SUM(monthly_unearned_premium), 
-      2
-    ) < (-0.01)
+    ROUND(SUM(monthly_unearned_premium), 2) < (-0.01)
 ), 
 -------monthly_earned_premium < 0
 monthly_earned_premium AS (
@@ -140,10 +137,7 @@ monthly_earned_premium AS (
   GROUP BY 
     encrypted_id 
   HAVING 
-    ROUND(
-      SUM(monthly_earned_premium), 
-      2
-    ) < (-0.01)
+    ROUND(SUM(monthly_earned_premium), 2) < (-0.01)
 ), 
 -------monthly_written_premium < 0
 monthly_written_premium AS (
@@ -156,10 +150,7 @@ monthly_written_premium AS (
   GROUP BY 
     encrypted_id 
   HAVING 
-    ROUND(
-      SUM(monthly_written_premium), 
-      2
-    ) < (-0.01)
+    ROUND(SUM(monthly_written_premium), 2) < (-0.01)
 ), 
 --Policy is active and written or earned <= 0
 active_policies AS (
