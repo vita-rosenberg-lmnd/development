@@ -70,7 +70,7 @@ flat_cancelled AS (
       SELECT 
         policy_id 
       FROM 
-        policy_premium_activities b 
+        policy_premium_activities b -- check that the policy didn't have a reinstate, that the "flat cancel" is the last event
       WHERE 
         a.id = b.policy_id 
         AND activity = 'policy_cancelation' 
