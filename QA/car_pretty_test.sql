@@ -111,7 +111,7 @@ monthly_unearned_premium AS(
   SELECT 
     SUM(monthly_unearned_premium) AS sum_of_type, 
     public_id, 
-    'Monthly_unearned_premium < 0' AS errType 
+    'Monthly unearned premium < 0' AS errType 
   FROM 
     temp_premium_report_us 
   GROUP BY 
@@ -125,7 +125,7 @@ monthly_earned_premium AS(
   SELECT 
     SUM(monthly_earned_premium) AS sum_of_type, 
     public_id, 
-    'Monthly_earned_premium < 0' AS errType 
+    'Monthly earned premium < 0' AS errType 
   FROM 
     temp_premium_report_us 
   GROUP BY 
@@ -139,7 +139,7 @@ monthly_written_premium AS(
   SELECT 
     SUM(monthly_written_premium) AS sum_of_type, 
     public_id, 
-    'Monthly_written_premium < 0' AS errType 
+    'Monthly written premium < 0' AS errType 
   FROM 
     temp_premium_report_us 
   GROUP BY 
