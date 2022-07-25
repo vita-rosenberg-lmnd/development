@@ -83,7 +83,7 @@ car_flat_cancelled_monthly_written_premium AS(
   GROUP BY 
     public_id 
   HAVING 
-    SUM(monthly_written_premium) <> 0
+    ROUND(SUM(monthly_written_premium), 4) <> 0
 ), 
 
 car_flat_cancelled_monthly_earned_premium AS(
@@ -103,7 +103,7 @@ car_flat_cancelled_monthly_earned_premium AS(
   GROUP BY 
     public_id 
   HAVING 
-    SUM(monthly_earned_premium) <> 0
+        ROUND(SUM(monthly_earned_premium), 4) <> 0
 ), 
 
 --monthly_unearned_premium < 0
@@ -111,13 +111,13 @@ monthly_unearned_premium AS(
   SELECT 
     SUM(monthly_unearned_premium) AS sum_of_type, 
     public_id, 
-    'monthly_unearned_premium < 0' AS errType 
+    'Monthly_unearned_premium < 0' AS errType 
   FROM 
     temp_premium_report_us 
   GROUP BY 
     public_id 
   HAVING 
-    SUM(monthly_unearned_premium) < 0
+    ROUND(SUM(monthly_unearned_premium), 4) < 0
 ), 
 
 --monthly_earned_premium < 0
@@ -125,13 +125,13 @@ monthly_earned_premium AS(
   SELECT 
     SUM(monthly_earned_premium) AS sum_of_type, 
     public_id, 
-    'monthly_earned_premium < 0' AS errType 
+    'Monthly_earned_premium < 0' AS errType 
   FROM 
     temp_premium_report_us 
   GROUP BY 
     public_id 
   HAVING 
-    SUM(monthly_earned_premium) < 0
+    ROUND(SUM(monthly_earned_premium), 4) < 0
 ), 
 
 --monthly_written_premium < 0
@@ -139,13 +139,13 @@ monthly_written_premium AS(
   SELECT 
     SUM(monthly_written_premium) AS sum_of_type, 
     public_id, 
-    'monthly_written_premium < 0' AS errType 
+    'Monthly_written_premium < 0' AS errType 
   FROM 
     temp_premium_report_us 
   GROUP BY 
     public_id 
   HAVING 
-    SUM(monthly_written_premium) < 0
+    ROUND(SUM(monthly_written_premium), 4) < 0
 ), 
 
 --car Policy is active and written or earned <= 0
@@ -195,8 +195,8 @@ car_active_policies_monthly_earned_premium AS(
   GROUP BY 
     public_id 
   HAVING 
-    SUM(monthly_earned_premium) <= 0
-), 
+    ROUND(SUM(monthly_earned_premium), 4) <= 0
+),
 
 --car Policy is not active and written <> earned
 car_inactive_policies AS(
@@ -211,7 +211,7 @@ car_inactive_policies AS(
 car_inactive_policies_monthly_difference AS(
   SELECT 
     (
-      SUM(monthly_written_premium) - SUM(monthly_earned_premium)
+      ROUND((SUM(monthly_written_premium) - SUM(monthly_earned_premium)), 4)
     ) AS sum_of_type, 
     public_id, 
     'Policy is not active and written <> earned' AS errType 
@@ -227,7 +227,7 @@ car_inactive_policies_monthly_difference AS(
   GROUP BY 
     public_id 
   HAVING 
-    (SUM(monthly_written_premium) - SUM(monthly_earned_premium)) <> 0
+    ROUND((SUM(monthly_written_premium) - SUM(monthly_earned_premium)), 4) <> 0
 ) 
 SELECT 
   public_id, 
@@ -262,7 +262,7 @@ SELECT
   errType,
   sum_of_type
 FROM 
-  monthly_unearned_premium 
+  monthly_unearned_premium
 UNION 
 SELECT 
   public_id, 
@@ -299,4 +299,5 @@ SELECT
 FROM 
   car_inactive_policies_monthly_difference 
 ORDER BY 
-  errType
+  errType,
+  sum_of_type
