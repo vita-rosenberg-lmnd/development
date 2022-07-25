@@ -31,6 +31,7 @@ combined AS(
     SELECT
     COALESCE(a.policy_id, b.policy_id) AS policy_id,
     COALESCE(a.month, b.month) AS month,
+    COALESCE(a.year, b.year) AS year,
     --LAST_DAY(CAST(DATE_TRUNC('quarter', COALESCE(a.month, b.month)) AS date) + INTERVAL '2 Months') AS quarter,
     COALESCE(a.premium_activities, 0) AS policy_monthly_premium_activites,
     COALESCE(b.earned_premium, 0) AS policy_monthly_earned_premium
