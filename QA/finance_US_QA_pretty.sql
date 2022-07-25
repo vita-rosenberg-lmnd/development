@@ -33,7 +33,7 @@ not_cancelled_monthly_written_premium AS (
   GROUP BY 
     encrypted_id 
   HAVING -- there is no approve for the 0.01
-    SUM(monthly_written_premium)=0
+    SUM(monthly_written_premium) = 0
 ), 
 
 not_cancelled_monthly_earned_premium AS (
