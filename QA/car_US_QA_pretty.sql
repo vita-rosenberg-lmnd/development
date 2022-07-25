@@ -18,7 +18,7 @@ car_not_cancelled_monthly_written_premium AS(
   SELECT 
     SUM(monthly_written_premium) AS sum_of_type, 
     public_id, 
-    'car_not_cancelled_monthly_written_premium' AS errType 
+    'Not canclled with written or earned = 0' AS errType 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -31,15 +31,14 @@ car_not_cancelled_monthly_written_premium AS(
   GROUP BY 
     public_id 
   HAVING 
-    (-0.01) < SUM(monthly_written_premium) 
-  AND SUM(monthly_written_premium) < (0.01)
+    SUM(monthly_written_premium) = 0
 ), 
 
 car_not_cancelled_monthly_earned_premium AS(
   SELECT 
     SUM(monthly_earned_premium) AS sum_of_type, 
     public_id, 
-    'car_not_cancelled_monthly_earned_premium' AS errType 
+    'Not canclled with written or earned = 0' AS errType 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -52,8 +51,7 @@ car_not_cancelled_monthly_earned_premium AS(
   GROUP BY 
     public_id 
   HAVING 
-    (-0.01) < SUM(monthly_earned_premium) 
-  AND SUM(monthly_earned_premium) < (0.01)
+    SUM(monthly_earned_premium) = 0
 ), 
 
 --car Flat canclled with written or earned <> 0
@@ -72,7 +70,7 @@ car_flat_cancelled_monthly_written_premium AS(
   SELECT 
     SUM(monthly_written_premium), 
     public_id, 
-    'car_flat_cancelled_monthly_written_premium' errType 
+    'Flat canclled with written or earned <> 0' errType 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -85,14 +83,14 @@ car_flat_cancelled_monthly_written_premium AS(
   GROUP BY 
     public_id 
   HAVING 
-    ABS(SUM(monthly_written_premium)) > 0.01
+    SUM(monthly_written_premium) <> 0
 ), 
 
 car_flat_cancelled_monthly_earned_premium AS(
   SELECT 
     SUM(monthly_earned_premium), 
     public_id, 
-    'car_flat_cancelled_monthly_earned_premium' errType 
+    'Flat canclled with written or earned <> 0' errType 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -104,7 +102,8 @@ car_flat_cancelled_monthly_earned_premium AS(
     ) 
   GROUP BY 
     public_id 
-  HAVING ABS(SUM(monthly_earned_premium)) > 0.01
+  HAVING 
+    SUM(monthly_earned_premium) <> 0
 ), 
 
 --monthly_unearned_premium < 0
@@ -117,7 +116,8 @@ monthly_unearned_premium AS(
     temp_premium_report_us 
   GROUP BY 
     public_id 
-  HAVING ROUND(SUM(monthly_unearned_premium), 2) < (-0.01)
+  HAVING 
+    SUM(monthly_unearned_premium) < 0
 ), 
 
 --monthly_earned_premium < 0
@@ -131,7 +131,7 @@ monthly_earned_premium AS(
   GROUP BY 
     public_id 
   HAVING 
-    ROUND(SUM(monthly_earned_premium), 2) < (-0.01)
+    SUM(monthly_earned_premium) < 0
 ), 
 
 --monthly_written_premium < 0
@@ -145,7 +145,7 @@ monthly_written_premium AS(
   GROUP BY 
     public_id 
   HAVING 
-    ROUND(SUM(monthly_written_premium), 2) < (-0.01)
+    SUM(monthly_written_premium) < 0
 ), 
 
 --car Policy is active and written or earned <= 0
@@ -162,7 +162,7 @@ car_active_policies_monthly_written_premium AS(
   SELECT 
     SUM(monthly_written_premium), 
     public_id, 
-    'car_active_policies_monthly_written_premium' AS errType 
+    'Policy is active and written or earned <= 0 ' AS errType 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -182,7 +182,7 @@ car_active_policies_monthly_earned_premium AS(
   SELECT 
     SUM(monthly_earned_premium), 
     public_id, 
-    'car_active_policies_monthly_earned_premium' AS errType 
+    'Policy is active and written or earned <= 0 ' AS errType 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -214,7 +214,7 @@ car_inactive_policies_monthly_difference AS(
       SUM(monthly_written_premium) - SUM(monthly_earned_premium)
     ) AS monthly_sum, 
     public_id, 
-    'car_inactive_policies_monthly_difference' AS errType 
+    'Policy is not active and written <> earned' AS errType 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -227,7 +227,7 @@ car_inactive_policies_monthly_difference AS(
   GROUP BY 
     public_id 
   HAVING 
-    ROUND(ABS((SUM(monthly_written_premium) - SUM(monthly_earned_premium))), 2) > 0.01
+    (SUM(monthly_written_premium) - SUM(monthly_earned_premium)) <> 0
 ) 
 SELECT 
   public_id, 
