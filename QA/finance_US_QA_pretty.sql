@@ -20,7 +20,7 @@ not_cancelled_monthly_written_premium AS (
   SELECT 
     SUM(monthly_written_premium) AS sum_of_type, 
     encrypted_id, 
-    'not_cancelled_monthly_written_premium' AS errtype 
+    'Not canclled with written or earned = 0' AS errtype 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -33,15 +33,14 @@ not_cancelled_monthly_written_premium AS (
   GROUP BY 
     encrypted_id 
   HAVING -- there is no approve for the 0.01
-    (-0.01) < SUM(monthly_written_premium) 
-  AND SUM(monthly_written_premium) < (0.01)
+    SUM(monthly_written_premium)=0
 ), 
 
 not_cancelled_monthly_earned_premium AS (
   SELECT 
     SUM(monthly_earned_premium) AS sum_of_type, 
     encrypted_id, 
-    'not_cancelled_monthly_earned_premium' AS errtype 
+    'Not canclled with written or earned = 0' AS errtype 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -54,8 +53,7 @@ not_cancelled_monthly_earned_premium AS (
   GROUP BY 
     encrypted_id 
   HAVING 
-    (-0.01) < SUM(monthly_earned_premium) 
-  AND SUM(monthly_earned_premium) < (0.01)
+    SUM(monthly_earned_premium)=0
 ), 
 
 --Flat canclled with written or earned <> 0
@@ -66,23 +64,13 @@ flat_cancelled AS (
     monolith.policies a 
   WHERE 
     flat_cancel <> 'FALSE' 
-    OR id IN (
-      SELECT 
-        policy_id 
-      FROM 
-        policy_premium_activities b -- check that the policy didn't have a reinstate, that the "flat cancel" is the last event
-      WHERE 
-        a.id = b.policy_id 
-        AND activity = 'policy_cancelation' 
-        AND METADATA : flat_cancel = 'true'
-    )
 ), 
 
 flat_cancelled_monthly_written_premium AS (
   SELECT 
     SUM(monthly_written_premium), 
     encrypted_id, 
-    'flat_cancelled_monthly_written_premium' AS errtype 
+    'Flat canclled with written or earned <> 0' AS errtype 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -95,15 +83,14 @@ flat_cancelled_monthly_written_premium AS (
   GROUP BY 
     encrypted_id --having SUM(monthly_written_premium)  <> 0
   HAVING 
-    (-0.01) > SUM(monthly_written_premium) 
-  OR SUM(monthly_written_premium) > (0.01)
+    SUM(monthly_written_premium) <> 0
 ), 
 
 flat_cancelled_monthly_earned_premium AS (
   SELECT 
     SUM(monthly_earned_premium), 
     encrypted_id, 
-    'flat_cancelled_monthly_earned_premium' AS errtype 
+    'Flat canclled with written or earned <> 0' AS errtype 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -116,8 +103,7 @@ flat_cancelled_monthly_earned_premium AS (
   GROUP BY 
     encrypted_id 
   HAVING 
-    (-0.01) > SUM(monthly_earned_premium) 
-  OR SUM(monthly_earned_premium) > (0.01)
+    SUM(monthly_earned_premium) <> 0
 ), 
 
 -------monthly_unearned_premium < 0
@@ -131,7 +117,7 @@ monthly_unearned_premium AS (
   GROUP BY 
     encrypted_id 
   HAVING 
-    ROUND(SUM(monthly_unearned_premium), 2) < (-0.01)
+    SUM(monthly_unearned_premium) < 0
 ), 
 
 -------monthly_earned_premium < 0
@@ -145,7 +131,7 @@ monthly_earned_premium AS (
   GROUP BY 
     encrypted_id 
   HAVING 
-    ROUND(SUM(monthly_earned_premium), 2) < (-0.01)
+    SUM(monthly_earned_premium) < 0
 ), 
 
 -------monthly_written_premium < 0
@@ -159,7 +145,7 @@ monthly_written_premium AS (
   GROUP BY 
     encrypted_id 
   HAVING 
-    ROUND(SUM(monthly_written_premium), 2) < (-0.01)
+    SUM(monthly_written_premium) < 0
 ), 
 
 --Policy is active and written or earned <= 0
@@ -176,7 +162,7 @@ active_policies_monthly_written_premium AS (
   SELECT 
     SUM(monthly_written_premium), 
     encrypted_id, 
-    'active_policies_monthly_written_premium' AS errtype 
+    'Policy is active and written or earned <= 0' AS errtype 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -196,7 +182,7 @@ active_policies_monthly_earned_premium AS (
   SELECT 
     SUM(monthly_earned_premium), 
     encrypted_id, 
-    'active_policies_monthly_earned_premium' AS errtype 
+    'Policy is active and written or earned <= 0' AS errtype 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -227,7 +213,7 @@ inactive_policies_monthly_difference AS (
       SUM(monthly_written_premium) - SUM(monthly_earned_premium)
     ) AS monthly_sum, 
     encrypted_id, 
-    'active_policies_monthly_difference' AS errtype 
+    'Policy is not active and written <> earned' AS errtype 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -239,7 +225,7 @@ inactive_policies_monthly_difference AS (
     ) 
   GROUP BY 
     encrypted_id 
-  HAVING round(abs((SUM(monthly_written_premium) - SUM(monthly_earned_premium))), 2) > 0.01
+  HAVING (SUM(monthly_written_premium) - SUM(monthly_earned_premium)) <> 0
 ) 
 
 SELECT 
