@@ -239,6 +239,12 @@ SELECT
   public_id, 
   errType 
 FROM 
+  car_not_cancelled_monthly_earned_premium 
+UNION
+SELECT 
+  public_id, 
+  errType 
+FROM 
   car_flat_cancelled_monthly_written_premium 
 UNION 
 SELECT 
