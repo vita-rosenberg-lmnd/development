@@ -32,7 +32,7 @@ not_cancelled_monthly_written_premium AS (
     ) 
   GROUP BY 
     encrypted_id 
-  HAVING 
+  HAVING -- there is no approve for the 0.01
     (-0.01) < SUM(monthly_written_premium) 
   AND SUM(monthly_written_premium) < (0.01)
 ), 
