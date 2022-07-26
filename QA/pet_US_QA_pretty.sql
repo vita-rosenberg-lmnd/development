@@ -11,14 +11,14 @@ pet_not_cancelled AS(
   FROM 
     pet.policies 
   WHERE 
-    canceled_at IS NULL
+    cancelled_at IS NULL
 ), 
 
 pet_not_cancelled_monthly_written_premium AS(
   SELECT 
     SUM(monthly_written_premium) AS sum_of_type, 
     public_id, 
-    'pet_not_cancelled_monthly_written_premium' AS errType 
+    'Not canclled with written or earned = 0' AS errType 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -31,15 +31,14 @@ pet_not_cancelled_monthly_written_premium AS(
   GROUP BY 
     public_id 
   HAVING 
-    (-0.01) < SUM(monthly_written_premium) 
-  AND SUM(monthly_written_premium) < (0.01)
+    SUM(monthly_written_premium) = 0
 ), 
 
 pet_not_cancelled_monthly_earned_premium AS(
   SELECT 
     SUM(monthly_earned_premium) AS sum_of_type, 
     public_id, 
-    'pet_not_cancelled_monthly_earned_premium' AS errType 
+    'Not canclled with written or earned = 0' AS errType 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -52,8 +51,7 @@ pet_not_cancelled_monthly_earned_premium AS(
   GROUP BY 
     public_id 
   HAVING 
-    (-0.01) < SUM(monthly_earned_premium) 
-    AND SUM(monthly_earned_premium) < (0.01)
+    SUM(monthly_earned_premium) = 0
 ), 
 
 --pet Flat canclled with written or earned <> 0
@@ -70,9 +68,9 @@ pet_flat_cancelled AS(
 
 pet_flat_cancelled_monthly_written_premium AS(
   SELECT 
-    SUM(monthly_written_premium), 
+    SUM(monthly_written_premium) AS sum_of_type, 
     public_id, 
-    'pet_flat_cancelled_monthly_written_premium' errType 
+    'Flat canclled with written or earned <> 0' errType 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -85,14 +83,14 @@ pet_flat_cancelled_monthly_written_premium AS(
   GROUP BY 
     public_id 
   HAVING 
-    ABS(SUM(monthly_written_premium)) > 0.01
+    ROUND(SUM(monthly_written_premium), 4) <> 0
 ), 
 
 pet_flat_cancelled_monthly_earned_premium AS(
   SELECT 
-    SUM(monthly_earned_premium), 
+    SUM(monthly_earned_premium) AS sum_of_type, 
     public_id, 
-    'pet_flat_cancelled_monthly_earned_premium' errType 
+    'Flat canclled with written or earned <> 0' errType 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -105,49 +103,49 @@ pet_flat_cancelled_monthly_earned_premium AS(
   GROUP BY 
     public_id 
   HAVING 
-    ABS(SUM(monthly_earned_premium)) > 0.01
+        ROUND(SUM(monthly_earned_premium), 4) <> 0
 ), 
 
 --monthly_unearned_premium < 0
 monthly_unearned_premium AS(
   SELECT 
-    SUM(monthly_unearned_premium), 
+    SUM(monthly_unearned_premium) AS sum_of_type, 
     public_id, 
-    'monthly_unearned_premium < 0' AS errType 
+    'Monthly unearned premium < 0' AS errType 
   FROM 
     temp_premium_report_us 
   GROUP BY 
     public_id 
   HAVING 
-    ROUND(SUM(monthly_unearned_premium), 2) < (-0.01)
+    ROUND(SUM(monthly_unearned_premium), 4) < 0
 ), 
 
 --monthly_earned_premium < 0
 monthly_earned_premium AS(
   SELECT 
-    SUM(monthly_earned_premium), 
+    SUM(monthly_earned_premium) AS sum_of_type, 
     public_id, 
-    'monthly_earned_premium < 0' AS errType 
+    'Monthly earned premium < 0' AS errType 
   FROM 
     temp_premium_report_us 
   GROUP BY 
     public_id 
   HAVING 
-    ROUND(SUM(monthly_earned_premium), 2) < (-0.01)
+    ROUND(SUM(monthly_earned_premium), 4) < 0
 ), 
 
 --monthly_written_premium < 0
 monthly_written_premium AS(
   SELECT 
-    SUM(monthly_written_premium), 
+    SUM(monthly_written_premium) AS sum_of_type, 
     public_id, 
-    'monthly_written_premium < 0' AS errType 
+    'Monthly written premium < 0' AS errType 
   FROM 
     temp_premium_report_us 
   GROUP BY 
     public_id 
   HAVING 
-    ROUND(SUM(monthly_written_premium), 2) < (-0.01)
+    ROUND(SUM(monthly_written_premium), 4) < 0
 ), 
 
 --pet Policy is active and written or earned <= 0
@@ -162,9 +160,9 @@ pet_active_policies AS(
 
 pet_active_policies_monthly_written_premium AS(
   SELECT 
-    SUM(monthly_written_premium), 
+    SUM(monthly_written_premium) AS sum_of_type, 
     public_id, 
-    'pet_active_policies_monthly_written_premium' AS errType 
+    'Policy is active and written or earned <= 0 ' AS errType 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -182,9 +180,9 @@ pet_active_policies_monthly_written_premium AS(
 
 pet_active_policies_monthly_earned_premium AS(
   SELECT 
-    SUM(monthly_earned_premium), 
+    SUM(monthly_earned_premium) AS sum_of_type, 
     public_id, 
-    'pet_active_policies_monthly_earned_premium' AS errType 
+    'Policy is active and written or earned <= 0 ' AS errType 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -197,8 +195,8 @@ pet_active_policies_monthly_earned_premium AS(
   GROUP BY 
     public_id 
   HAVING 
-    SUM(monthly_earned_premium) <= 0
-), 
+    ROUND(SUM(monthly_earned_premium), 4) <= 0
+),
 
 --pet Policy is not active and written <> earned
 pet_inactive_policies AS(
@@ -213,10 +211,10 @@ pet_inactive_policies AS(
 pet_inactive_policies_monthly_difference AS(
   SELECT 
     (
-      SUM(monthly_written_premium) - SUM(monthly_earned_premium)
-    ) AS monthly_sum, 
+      ROUND((SUM(monthly_written_premium) - SUM(monthly_earned_premium)), 4)
+    ) AS sum_of_type, 
     public_id, 
-    'pet_inactive_policies_monthly_difference' AS errType 
+    'Policy is not active and written <> earned' AS errType 
   FROM 
     temp_premium_report_us 
   WHERE 
@@ -229,66 +227,65 @@ pet_inactive_policies_monthly_difference AS(
   GROUP BY 
     public_id 
   HAVING 
-    ROUND(ABS((SUM(monthly_written_premium) - SUM(monthly_earned_premium))), 2) > 0.01
+    ROUND((SUM(monthly_written_premium) - SUM(monthly_earned_premium)), 4) <> 0
 ) 
-
 SELECT 
   public_id, 
-  errType 
+  errType
 FROM 
   pet_not_cancelled_monthly_written_premium 
 UNION 
 SELECT 
   public_id, 
-  errType 
+  errType
 FROM 
   pet_not_cancelled_monthly_earned_premium 
-UNION 
+UNION
 SELECT 
   public_id, 
-  errType 
+  errType
 FROM 
   pet_flat_cancelled_monthly_written_premium 
 UNION 
 SELECT 
   public_id, 
-  errType 
+  errType
 FROM 
   pet_flat_cancelled_monthly_earned_premium 
 UNION 
 SELECT 
   public_id, 
-  errType 
+  errType
 FROM 
-  monthly_unearned_premium 
+  monthly_unearned_premium
 UNION 
 SELECT 
   public_id, 
-  errType 
+  errType
 FROM 
   monthly_earned_premium 
 UNION 
 SELECT 
   public_id, 
-  errType 
+  errType
 FROM 
   monthly_written_premium 
 UNION 
 SELECT 
   public_id, 
-  errType 
+  errType
 FROM 
   pet_active_policies_monthly_written_premium 
 UNION 
 SELECT 
   public_id, 
-  errType 
+  errType
 FROM 
   pet_active_policies_monthly_earned_premium 
 UNION 
 SELECT 
   public_id, 
-  errType 
+  errType
 FROM 
   pet_inactive_policies_monthly_difference 
 ORDER BY 
