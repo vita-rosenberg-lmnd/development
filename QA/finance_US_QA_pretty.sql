@@ -81,9 +81,9 @@ flat_cancelled_monthly_written_premium AS (
         flat_cancelled
     ) 
   GROUP BY 
-    encrypted_id --having SUM(monthly_written_premium)  <> 0
+    encrypted_id
   HAVING 
-    SUM(monthly_written_premium) <> 0
+    ROUND(SUM(monthly_written_premium), 4) <> 0
 ), 
 
 flat_cancelled_monthly_earned_premium AS (
@@ -103,7 +103,7 @@ flat_cancelled_monthly_earned_premium AS (
   GROUP BY 
     encrypted_id 
   HAVING 
-    SUM(monthly_earned_premium) <> 0
+    ROUND(SUM(monthly_earned_premium), 4) <> 0
 ), 
 
 -------monthly_unearned_premium < 0
@@ -117,7 +117,7 @@ monthly_unearned_premium AS (
   GROUP BY 
     encrypted_id 
   HAVING 
-    SUM(monthly_unearned_premium) < 0
+    ROUND(SUM(monthly_unearned_premium), 4) < 0
 ), 
 
 -------monthly_earned_premium < 0
@@ -131,7 +131,7 @@ monthly_earned_premium AS (
   GROUP BY 
     encrypted_id 
   HAVING 
-    SUM(monthly_earned_premium) < 0
+    ROUND(SUM(monthly_earned_premium), 4) < 0
 ), 
 
 -------monthly_written_premium < 0
@@ -145,7 +145,7 @@ monthly_written_premium AS (
   GROUP BY 
     encrypted_id 
   HAVING 
-    SUM(monthly_written_premium) < 0
+    ROUND(SUM(monthly_written_premium), 4) < 0
 ), 
 
 --Policy is active and written or earned <= 0
@@ -195,7 +195,7 @@ active_policies_monthly_earned_premium AS (
   GROUP BY 
     encrypted_id 
   HAVING 
-    SUM(monthly_earned_premium) <= 0
+    ROUND(SUM(SUM(monthly_earned_premium), 4) <= 0
 ), 
 
 --Policy is not active and written <> earned
@@ -225,7 +225,7 @@ inactive_policies_monthly_difference AS (
     ) 
   GROUP BY 
     encrypted_id 
-  HAVING (SUM(monthly_written_premium) - SUM(monthly_earned_premium)) <> 0
+  HAVING ROUND((SUM(monthly_written_premium) - SUM(monthly_earned_premium)), 4) <> 0
 ) 
 
 SELECT 
