@@ -11,7 +11,7 @@ pet_not_cancelled AS(
   FROM 
     pet.policies 
   WHERE 
-    cancelled_at IS NULL
+    canceled_at IS NULL
 ), 
 
 pet_not_cancelled_monthly_written_premium AS(
