@@ -68,7 +68,7 @@ flat_cancelled AS (
 
 flat_cancelled_monthly_written_premium AS (
   SELECT 
-    SUM(monthly_written_premium), 
+    SUM(monthly_written_premium) AS sum_of_type, 
     encrypted_id, 
     'Flat canclled with written or earned <> 0' AS errtype 
   FROM 
@@ -88,7 +88,7 @@ flat_cancelled_monthly_written_premium AS (
 
 flat_cancelled_monthly_earned_premium AS (
   SELECT 
-    SUM(monthly_earned_premium), 
+    SUM(monthly_earned_premium) AS sum_of_type, 
     encrypted_id, 
     'Flat canclled with written or earned <> 0' AS errtype 
   FROM 
@@ -109,7 +109,7 @@ flat_cancelled_monthly_earned_premium AS (
 -------monthly_unearned_premium < 0
 monthly_unearned_premium AS (
   SELECT 
-    SUM(monthly_unearned_premium), 
+    SUM(monthly_unearned_premium) AS sum_of_type, 
     encrypted_id, 
     'monthly_unearned_premium < 0' AS errtype 
   FROM 
@@ -123,7 +123,7 @@ monthly_unearned_premium AS (
 -------monthly_earned_premium < 0
 monthly_earned_premium AS (
   SELECT 
-    SUM(monthly_earned_premium), 
+    SUM(monthly_earned_premium) AS sum_of_type, 
     encrypted_id, 
     'monthly_earned_premium < 0' AS errtype 
   FROM 
@@ -137,7 +137,7 @@ monthly_earned_premium AS (
 -------monthly_written_premium < 0
 monthly_written_premium AS (
   SELECT 
-    SUM(monthly_written_premium), 
+    SUM(monthly_written_premium) AS sum_of_type, 
     encrypted_id, 
     'monthly_written_premium < 0' AS errtype 
   FROM 
@@ -160,7 +160,7 @@ active_policies AS (
 
 active_policies_monthly_written_premium AS (
   SELECT 
-    SUM(monthly_written_premium), 
+    SUM(monthly_written_premium) AS sum_of_type, 
     encrypted_id, 
     'Policy is active and written or earned <= 0' AS errtype 
   FROM 
@@ -180,7 +180,7 @@ active_policies_monthly_written_premium AS (
 
 active_policies_monthly_earned_premium AS (
   SELECT 
-    SUM(monthly_earned_premium), 
+    SUM(monthly_earned_premium) AS sum_of_type, 
     encrypted_id, 
     'Policy is active and written or earned <= 0' AS errtype 
   FROM 
@@ -211,7 +211,7 @@ inactive_policies_monthly_difference AS (
   SELECT 
     (
       SUM(monthly_written_premium) - SUM(monthly_earned_premium)
-    ) AS monthly_sum, 
+    ) AS sum_of_type, 
     encrypted_id, 
     'Policy is not active and written <> earned' AS errtype 
   FROM 
@@ -230,55 +230,64 @@ inactive_policies_monthly_difference AS (
 
 SELECT 
   encrypted_id, 
-  errtype 
+  errtype,
+  sum_of_type
 FROM 
   not_cancelled_monthly_written_premium 
 UNION 
 SELECT 
   encrypted_id, 
-  errtype 
+  errtype,
+  sum_of_type 
 FROM 
   flat_cancelled_monthly_written_premium 
 UNION 
 SELECT 
   encrypted_id, 
-  errtype 
+  errtype,
+  sum_of_type 
 FROM 
   flat_cancelled_monthly_earned_premium 
 UNION 
 SELECT 
   encrypted_id, 
-  errtype 
+  errtype,
+  sum_of_type 
 FROM 
   monthly_unearned_premium 
 UNION 
 SELECT 
   encrypted_id, 
-  errtype 
+  errtype,
+  sum_of_type
 FROM 
   monthly_earned_premium 
 UNION 
 SELECT 
   encrypted_id, 
-  errtype 
+  errtype,
+  sum_of_type 
 FROM 
   monthly_written_premium 
 UNION 
 SELECT 
   encrypted_id, 
-  errtype 
+  errtype,
+  sum_of_type
 FROM 
   active_policies_monthly_written_premium 
 UNION 
 SELECT 
   encrypted_id, 
-  errtype 
+  errtype,
+  sum_of_type 
 FROM 
   active_policies_monthly_earned_premium 
 UNION 
 SELECT 
   encrypted_id, 
-  errtype 
+  errtype,
+  sum_of_type 
 FROM 
   inactive_policies_monthly_difference 
 ORDER BY 
