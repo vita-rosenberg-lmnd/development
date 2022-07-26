@@ -2,19 +2,19 @@ WITH temp_premium_report_us AS(
   select 
     * 
   FROM 
-    car_finance.premium_report_us
+    pet_finance.premium_report_us
 ), 
 
-car_not_cancelled AS(
+pet_not_cancelled AS(
   SELECT 
     public_id 
   FROM 
-    car.policies 
+    pet.policies 
   WHERE 
     cancelled_at IS NULL
 ), 
 
-car_not_cancelled_monthly_written_premium AS(
+pet_not_cancelled_monthly_written_premium AS(
   SELECT 
     SUM(monthly_written_premium) AS sum_of_type, 
     public_id, 
@@ -26,7 +26,7 @@ car_not_cancelled_monthly_written_premium AS(
       SELECT 
         public_id 
       FROM 
-        car_not_cancelled
+        pet_not_cancelled
     ) 
   GROUP BY 
     public_id 
@@ -34,7 +34,7 @@ car_not_cancelled_monthly_written_premium AS(
     SUM(monthly_written_premium) = 0
 ), 
 
-car_not_cancelled_monthly_earned_premium AS(
+pet_not_cancelled_monthly_earned_premium AS(
   SELECT 
     SUM(monthly_earned_premium) AS sum_of_type, 
     public_id, 
@@ -46,7 +46,7 @@ car_not_cancelled_monthly_earned_premium AS(
       SELECT 
         public_id 
       FROM 
-        car_not_cancelled
+        pet_not_cancelled
     ) 
   GROUP BY 
     public_id 
@@ -54,8 +54,8 @@ car_not_cancelled_monthly_earned_premium AS(
     SUM(monthly_earned_premium) = 0
 ), 
 
---car Flat canclled with written or earned <> 0
-car_flat_cancelled AS(
+--pet Flat canclled with written or earned <> 0
+pet_flat_cancelled AS(
   SELECT 
     entity_id AS policyId 
   FROM 
@@ -63,10 +63,10 @@ car_flat_cancelled AS(
   WHERE 
     activity = 'policy_cancellation' 
     AND metadata : flat = 'true' 
-    AND entity_id LIKE 'LCP%'
+    AND entity_id LIKE 'LPP%'
 ), 
 
-car_flat_cancelled_monthly_written_premium AS(
+pet_flat_cancelled_monthly_written_premium AS(
   SELECT 
     SUM(monthly_written_premium) AS sum_of_type, 
     public_id, 
@@ -78,7 +78,7 @@ car_flat_cancelled_monthly_written_premium AS(
       SELECT 
         policyId 
       FROM 
-        car_flat_cancelled
+        pet_flat_cancelled
     ) 
   GROUP BY 
     public_id 
@@ -86,7 +86,7 @@ car_flat_cancelled_monthly_written_premium AS(
     ROUND(SUM(monthly_written_premium), 4) <> 0
 ), 
 
-car_flat_cancelled_monthly_earned_premium AS(
+pet_flat_cancelled_monthly_earned_premium AS(
   SELECT 
     SUM(monthly_earned_premium) AS sum_of_type, 
     public_id, 
@@ -98,7 +98,7 @@ car_flat_cancelled_monthly_earned_premium AS(
       SELECT 
         policyId 
       FROM 
-        car_flat_cancelled
+        pet_flat_cancelled
     ) 
   GROUP BY 
     public_id 
@@ -148,17 +148,17 @@ monthly_written_premium AS(
     ROUND(SUM(monthly_written_premium), 4) < 0
 ), 
 
---car Policy is active and written or earned <= 0
-car_active_policies AS(
+--pet Policy is active and written or earned <= 0
+pet_active_policies AS(
   SELECT 
     public_id 
   FROM 
-    car.policies 
+    pet.policies 
   WHERE 
     status = 'active'
 ), 
 
-car_active_policies_monthly_written_premium AS(
+pet_active_policies_monthly_written_premium AS(
   SELECT 
     SUM(monthly_written_premium) AS sum_of_type, 
     public_id, 
@@ -170,7 +170,7 @@ car_active_policies_monthly_written_premium AS(
       SELECT 
         public_id 
       FROM 
-        car_active_policies
+        pet_active_policies
     ) 
   GROUP BY 
     public_id 
@@ -178,7 +178,7 @@ car_active_policies_monthly_written_premium AS(
     SUM(monthly_written_premium) <= 0
 ), 
 
-car_active_policies_monthly_earned_premium AS(
+pet_active_policies_monthly_earned_premium AS(
   SELECT 
     SUM(monthly_earned_premium) AS sum_of_type, 
     public_id, 
@@ -190,7 +190,7 @@ car_active_policies_monthly_earned_premium AS(
       SELECT 
         public_id 
       FROM 
-        car_active_policies
+        pet_active_policies
     ) 
   GROUP BY 
     public_id 
@@ -198,17 +198,17 @@ car_active_policies_monthly_earned_premium AS(
     ROUND(SUM(monthly_earned_premium), 4) <= 0
 ),
 
---car Policy is not active and written <> earned
-car_inactive_policies AS(
+--pet Policy is not active and written <> earned
+pet_inactive_policies AS(
   SELECT 
     public_id 
   FROM 
-    car.policies 
+    pet.policies 
   WHERE 
     status <> 'active'
 ), 
 
-car_inactive_policies_monthly_difference AS(
+pet_inactive_policies_monthly_difference AS(
   SELECT 
     (
       ROUND((SUM(monthly_written_premium) - SUM(monthly_earned_premium)), 4)
@@ -222,7 +222,7 @@ car_inactive_policies_monthly_difference AS(
       SELECT 
         public_id 
       FROM 
-        car_inactive_policies
+        pet_inactive_policies
     ) 
   GROUP BY 
     public_id 
@@ -234,28 +234,28 @@ SELECT
   errType,
   sum_of_type
 FROM 
-  car_not_cancelled_monthly_written_premium 
+  pet_not_cancelled_monthly_written_premium 
 UNION 
 SELECT 
   public_id, 
   errType,
   sum_of_type
 FROM 
-  car_not_cancelled_monthly_earned_premium 
+  pet_not_cancelled_monthly_earned_premium 
 UNION
 SELECT 
   public_id, 
   errType,
   sum_of_type
 FROM 
-  car_flat_cancelled_monthly_written_premium 
+  pet_flat_cancelled_monthly_written_premium 
 UNION 
 SELECT 
   public_id, 
   errType,
   sum_of_type
 FROM 
-  car_flat_cancelled_monthly_earned_premium 
+  pet_flat_cancelled_monthly_earned_premium 
 UNION 
 SELECT 
   public_id, 
@@ -283,21 +283,21 @@ SELECT
   errType,
   sum_of_type
 FROM 
-  car_active_policies_monthly_written_premium 
+  pet_active_policies_monthly_written_premium 
 UNION 
 SELECT 
   public_id, 
   errType,
   sum_of_type
 FROM 
-  car_active_policies_monthly_earned_premium 
+  pet_active_policies_monthly_earned_premium 
 UNION 
 SELECT 
   public_id, 
   errType,
   sum_of_type 
 FROM 
-  car_inactive_policies_monthly_difference 
+  pet_inactive_policies_monthly_difference 
 ORDER BY 
   errType,
   sum_of_type
