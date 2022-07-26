@@ -195,7 +195,7 @@ active_policies_monthly_earned_premium AS (
   GROUP BY 
     encrypted_id 
   HAVING 
-    ROUND(SUM(SUM(monthly_earned_premium), 4) <= 0
+    ROUND(SUM(monthly_earned_premium), 4) <= 0
 ), 
 
 --Policy is not active and written <> earned
