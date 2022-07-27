@@ -117,7 +117,7 @@ monthly_unearned_premium AS(
   GROUP BY 
     public_id 
   HAVING 
-    SUM(monthly_unearned_premium) < 0
+    ROUND(SUM(monthly_unearned_premium)) < 0
 ), 
 
 --monthly_earned_premium < 0
@@ -131,7 +131,7 @@ monthly_earned_premium AS(
   GROUP BY 
     public_id 
   HAVING 
-    SUM(monthly_earned_premium) < 0
+    ROUND(SUM(monthly_earned_premium)) < 0
 ), 
 
 --monthly_written_premium < 0
@@ -145,7 +145,7 @@ monthly_written_premium AS(
   GROUP BY 
     public_id 
   HAVING 
-    SUM(monthly_written_premium) < 0
+    ROUND(SUM(monthly_written_premium)) < 0
 ), 
 
 --car Policy is active and written or earned <= 0
