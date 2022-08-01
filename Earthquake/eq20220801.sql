@@ -19,48 +19,20 @@ select --policy_id,
     WHERE endorsement_type = 'lemonade_earthquake'
 ),
 
---select count(*)
-base_sum_cte AS(
-select --policy_id,
-policy_version_id,
---sum(endorsement_value) AS annual_sum,
-endorsement_value,    
-ROW_NUMBER() OVER (PARTITION BY policy_version_id ORDER BY calc_index DESC) AS rn,
-calc_index
+calc_index_cte AS(
+select
+    policy_version_id,
+    endorsement_value,    
+    ROW_NUMBER() OVER (PARTITION BY policy_version_id ORDER BY calc_index DESC) AS row_number_of_calc_index
 from policy_endorsements_cte 
---group by --policy_id,
---policy_version_id--, calc_index
-)
---,
---,
---select policy_version_id, sum(endorsement_value) AS annual_sum
---from base_sum_cte
---where rn = 1
---group by policy_version_id
+),
 
-
-select * -- 189,671
-from base_sum_cte
-where rn = 1
---sss AS (select endorsement_value,
---ROW_NUMBER() OVER (PARTITION BY policy_version_id ORDER BY endorsement_value) AS rn, policy_version_id
---from base_sum_cte)
-
+base_sum_cte AS(
 select policy_version_id,
-endorsement_value,
---annual_sum,
-endorsement_value, 
-rn,
-calc_index
-FROM base_sum_cte
-where policy_version_id = 22068486
---where rn<>1
---limit 1000
-
-
-select count(*)--189670 with group by
---no group by 190,317
-from base_sum_cte
+       endorsement_value AS annual_sum
+from calc_index_cte
+where row_number_of_calc_index = 1
+),
 
 dates_cte AS(
 SELECT pv.policy_id, 
@@ -111,9 +83,6 @@ from date_diff_cte dd-- join timezones t on dd.state=t.state_code
 --WHERE num_of_days_UTC<>num_of_days
 ),
 
---select * from flat_versions
---where policy_id = 5227949
-
 a_few_versions_a_day AS(
 select policy_id, 
        policy_version_id,
@@ -131,11 +100,8 @@ select policy_id,
        amount_per_active_days,
        state
 from flat_versions  
---group by policy_id
-order by policy_id,
-start_date_UTC
---where policy_id = 5227949
     )
+    
 select policy_id, 
        policy_version_id,
        Last_version_a_day,
@@ -152,70 +118,6 @@ select policy_id,
        amount_per_active_days,
        state   
 from  a_few_versions_a_day
---where Last_version_a_day=1
-where policy_id=2523935
+where Last_version_a_day = 1
+--policy_id=2523935
 --where start_date_UTC=end_date_UTC
-
-
-
-select * from timezones;
-
-
-select TO_VARCHAR(CONVERT_TIMEZONE('UTC' ,events.timezone , original_policies.created_at)::date, 'YYYYMMDD')::int,
-
-
-SELECT * FROM monolith.policy_versions limit 100
-
-select * from monolith.policies
-limit 100
-
-select * from monolith.policy_version_premiums
- 
-
-select * from public.policy_premium_activities
-
-
-
-
-with policy_versions_cte AS (
-select 
-    b.policy_id AS policy_id,
-    a.policy_version_id,
-    TRY_PARSE_JSON(premium_breakdown) AS premium_breakdown_json, 
-    premium_breakdown_json:endorsements AS endorsements
-from monolith.policy_version_premiums a join monolith.policy_versions b on a.policy_version_id=b.id join monolith.policies c on b.policy_id=c.id
-    )
-select * from policy_versions_cte
-where policy_id = 5227949
-
-select convert_timezone('America/Los_Angeles', 'America/New_York', '2019-01-01 14:00:00'::timestamp_ntz) as conv;
-
-select 
-start_date, 
-end_date, 
-convert_timezone('UTC', t.timezone, start_date) AS start_date_UTC,
-convert_timezone(t.timezone, end_date) AS end_date_UTC,
-pv.state,*
-from monolith.policy_versions pv join timezones t on pv.state=t.state_code
-where policy_id = 5227949
-
-
-select 
-start_date, 
-end_date,
-*
-from monolith.policy_versions
-where policy_id = 5227949
-
-select * from monolith.policy_version_premiums
-where policy_version_id 
-IN
-(
-27233553
-,22816797
-,20405928
-,21910478
-,22362905
-,24519988
-,21237983
-,22337205)
