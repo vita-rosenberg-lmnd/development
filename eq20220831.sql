@@ -120,9 +120,7 @@ select policy_id,
        state,
        years_insured,--not this
        t.date_date,
-       extract(year from t.date_date) AS year_,
-       IFF(year_%4 = 0 , 366, 365) AS num_of_days_in_year_today,--change effective date plus year 
-       annual_sum / num_of_days_in_year_today as daily_sum
+       annual_sum / DATEDIFF(day, start_date, end_date) as daily_sum
 from num_of_days_last_version_plus_one_join_policies l join dim_date_cte t 
      ON l.start_date<=t.date_date AND t.date_date<end_date
 --WHERE policy_id=5227949-- and policy_version_id<>25695886
